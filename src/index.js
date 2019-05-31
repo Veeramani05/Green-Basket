@@ -1,14 +1,23 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import 'axios-progress-bar/dist/nprogress.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
+import 'styles/animation.css';
 import 'styles/index.css';
+import 'styles/userstyle.css';
+
 import App from 'components/App';
-import { BrowserRouter as Router } from 'react-router-dom'
+import { SnackbarProvider } from 'notistack';
+import React from 'react';
+import { render } from 'react-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
+
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<Router><App /></Router>, document.getElementById('root'));
+
+
+
+render(<SnackbarProvider maxSnack={1} preventDuplicate  > <Router><App /></Router> </SnackbarProvider>, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

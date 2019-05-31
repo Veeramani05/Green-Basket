@@ -1,21 +1,80 @@
-import React, { PureComponent, Fragment } from 'react';
-import { Row, Col, FormGroup, Label } from 'reactstrap'
-import { Form } from 'informed';
-import Joi from 'joi-browser';
-
-import { Input } from 'components/common/forms/Input'
-
-import BreadCrumb from 'components/common/forms/BreadCrumb';
 import 'styles/forms.css';
 
+import { post } from 'axios';
+import BreadCrumb from 'components/common/forms/BreadCrumb';
+import { CustomSelect } from 'components/common/forms/custom-select';
+import { Input } from 'components/common/forms/Input';
+import { Form } from 'informed';
+import Joi from 'joi-browser';
+import { withSnackbar } from 'notistack';
+import React, { Fragment, PureComponent } from 'react';
+import { Col, Row } from 'reactstrap';
+
+import { addCategory, updateCategory } from '../../../service/catalogService';
+import { apiUrl } from './../../../config.json';
+
 class AddCatagory extends PureComponent {
+
   constructor(props) {
     super(props)
-    this.state = {
-      data: {},
-      isEditForm: false
-    }
+    this.notificationDOMRef = React.createRef();
+  }
 
+  state = {
+    data: {},
+    status: [{ id: "A", name: "Active" }, { id: "D", name: "InActive" },]
+  }
+
+  async componentDidMount() {
+    const { formType } = this.props
+    if (formType === "edit") {
+      const { location: { state } } = this.props.props;
+      return this.formStateCheck(state.row);
+    }
+  }
+
+  formStateCheck = async (data) => {
+    await this.setState({ data, categoryId: data.categoryId });
+    try {
+      await this.formApi.setValues(data);
+    } catch (err) {
+    }
+  }
+
+  setFormApi = formApi => {
+    this.formApi = formApi;
+  };
+
+  handleChange = async ({ currentTarget: Input }) => {
+    const { name, value } = Input;
+    const { data } = this.state;
+    data[name] = value;
+    await this.setState({ [name]: value })
+  }
+
+  handleImage = async e => {
+    let imgUrl = await this.fileUpload(e.target.files[0]);
+    const data = this.formApi.getState().values;
+    data['categoryImage'] = imgUrl.data.data;
+    await this.formApi.setValues(data);
+  };
+
+  fileUpload(file) {
+    const url = `${apiUrl}/uploadImage`;
+    const formData = new FormData();
+    formData.append('image', file)
+    const config = {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
+    }
+    return post(url, formData, config)
+  }
+
+  schema = {
+    categoryName: Joi.string().required().label('Category Name'),
+    categoryImage: Joi.string().required().label('Category Image'),
+    categoryStatus: Joi.string().required().label('Satus'),
   }
 
   validateProperty = (name, value) => {
@@ -24,92 +83,100 @@ class AddCatagory extends PureComponent {
     return error ? error.details[0].message : null;
   };
 
-  schema = {
-    categoryName: Joi.string().required().label("Name"),
-    categoryImage: Joi.string().required().label("Image"),
-    categoryStatus: Joi.string().required().label("Status"),
-  };
-
-
-  setFormApi = (formApi) => {
-    this.formApi = formApi;
+  onSubmit = async () => {
+    let response;
+    const data = this.formApi.getState().values;
+    const { formType } = this.props
+    const { categoryId } = this.state;
+    if (formType === "add") {
+      delete data.categoryimage
+      response = await addCategory(data)
+    } else {
+      delete data.categoryimage
+      data['categoryId'] = categoryId
+      response = await updateCategory(data)
+    }
+    if (response.data.statusCode !== 1) return await this.addNotification(response.data.data, "danger")
+    if (response.data.statusCode === 1) {
+      await this.addNotification(response.data.data)
+      await this.resetForm()
+    }
   }
 
-  handleChange = async ({ currentTarget: Input }) => {
-    const { name, value } = Input;
-    const { data } = this.state;
-    data[name] = value;
-    await this.setState({ data })
-    await this.formApi.setValues(data);
-    let data1 = this.formApi.getState().values;
-    console.log(data1)
+  resetForm = async () => {
+    this.formApi.reset()
+    let path = `/catalog/categories`
+    const { formType } = this.props
+    if (formType === "edit") {
+      setTimeout(() => {
+        this.props.props.history.push(path)
+      }, 3000);
+    }
   }
-
-  onSubmit = () => {
-    // const { isEditForm } = this.state;
-    let data = this.formApi.getState().values;
-    console.log(data)
+  addNotification = (message, variant = "success") => {
+    const { enqueueSnackbar } = this.props
+    const options = { variant, anchorOrigin: { vertical: "bottom", horizontal: "center", autoHideDuration: 1000 } };
+    enqueueSnackbar(message, options)
   }
-
-
-
 
   render() {
+    let FormName;
     const { formType } = this.props;
+    if (formType === 'add') {
+      FormName = 'Add Catagories'
+    } else {
+      FormName = 'Edit Catagories'
+    }
     const breadCrumbItems = {
-      title: formType + " Categories",
+      title: `${FormName}`,
       items: [
         { name: "Home", link: "/dashboard" },
-        { name: "Catagories", link: "/catalog/categories" },
-        { name: `${formType} Catagories `, active: true },
+        { name: "Categories", link: "/catalog/categories" },
+        { name: `${FormName}  `, active: true },
       ]
     };
+
     return (
-      <Fragment>
-        <BreadCrumb data={breadCrumbItems} />
-        <Row>
-
-          <Form className="col-12" getApi={this.setFormApi} onSubmit={this.onSubmit}>
-            {({ formApi, formState }) => (
-
-              <div>
-                {JSON.stringify(formState)}
-                <Row className="form-div">
+      <Fragment> 
+        <Form getApi={this.setFormApi} onSubmit={this.onSubmit}>
+          {({ formApi, formState }) => (
+            <div>
+              <BreadCrumb data={breadCrumbItems} />
+              <div className="form-div">
+                <Row>
                   <Col md={3} sm={12} >
-                    <FormGroup>
-                      <Label for="email">Category Name</Label>
-                      <Input type="text" field="categoryName" validate={e => this.validateProperty('categoryName', e)} validateonblur onChange={this.handleChange} />
-                    </FormGroup>
+                    <Input
+                      field="categoryName" label="Category Name" name="categoryName" onChange={this.handleChange} validateOnBlur validate={e => this.validateProperty('categoryName', e)}
+                    />
                   </Col>
                   <Col md={3} sm={12} >
-                    <FormGroup>
-                      <Label for="email">Category Image</Label>
-                      <Input type="file" className="form-control" accept="image/*" field="categoryImage" validateOnBlur validate={e => this.validateProperty('categoryImage', e)} onChange={this.handleChange} />
-                    </FormGroup>
+                    <CustomSelect field="categoryStatus" label="Status" name="categoryStatus" getOptionValue={option => option.id} getOptionLabel={option => option.name} options={this.state.status} onChange={this.handleChange} validateOnBlur validate={e => this.validateProperty('categoryStatus', e)}
+                    />
                   </Col>
                   <Col md={3} sm={12} >
-                    <FormGroup>
-                      <Label for="email">Status</Label>
-                      <select type="text" className="form-control" field="categoryStatus" validateOnBlur validate={e => this.validateProperty('categoryStatus', e)} onChange={this.handleChange}   >
-                        <option value="N">Active</option>
-                        <option value="N">InActive</option>
-                      </select>
-                    </FormGroup>
+                    <Input field="categoryimage" type="file" multiple label="Choose Category Image"
+                      name="categoryimage" onChange={this.handleImage}
+                    />
                   </Col>
                 </Row>
-                <div className="d-flex justify-content-end">
-                  <button type="button" className="btn btn-warning btn-sm mr-3" id="cancelbtn">Cancel</button>
-                  <button type="submit" className="btn btn-primary btn-sm" >Submit</button>
-                </div>
+                <Row>
+                  {formType !== 'add' && <Col md={6} sm={12} >
+                    <Input field="categoryImage" label="Category Image"
+                      name="categoryImage" readOnly validateOnBlur validate={e => this.validateProperty('categoryImage', e)}
+                    />
+                  </Col>}
+                </Row>
               </div>
-
-            )}
-          </Form>
-        </Row>
+              <div className="d-flex justify-content-end">
+                <button type="button" className="btn btn-warning btn-sm mr-3" id="cancelbtn" onClick={() => this.resetForm()}>Cancel</button>
+                <button type="submit" className="btn btn-primary btn-sm">Submit</button>
+              </div>
+            </div>
+          )}
+        </Form>
       </Fragment>
     )
   }
 }
 
-
-export default AddCatagory;
+export default withSnackbar(AddCatagory);

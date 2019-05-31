@@ -1,12 +1,11 @@
-import React, { PureComponent, Fragment } from 'react';
-
 import AddBanner from 'components/banner/forms/AddBanner';
+import React, { Fragment, PureComponent } from 'react';
 
 class BannerForms extends PureComponent {
 
 
   frameLoad = () => {
-    return <AddBanner />
+    return <AddBanner  props={this.props}  />
   }
   render() {
     return (

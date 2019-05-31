@@ -1,8 +1,7 @@
 .table-div {
-  padding: 1rem;
-  background: #fff;
   border-radius: 4px;
-  box-shadow: 3px 9px 17px -15px #ddd;
+  box-shadow: 3px 4px 27px -2px #e6e6e6;
+  background: #fff;
 }
 
 .table {
@@ -11,7 +10,7 @@
 }
 
 .table th {
-  background: #293535;
+  background: #6db444 !important;
   font-weight: 500;
   font-size: 0.9rem;
   vertical-align: initial !important;
@@ -19,7 +18,7 @@
 }
 .table td {
   font-size: 0.8rem !important;
-  color: #7d7171;
+  color: #201e1e;
   text-rendering: optimizeLegibility;
   font-weight: 400;
 }
@@ -89,10 +88,10 @@ table.dataTable thead .sorting_desc_disabled:after {
   color: #fff;
   background-color: #dc3545;
 }
-
+/* 
 td svg {
   color: #ffc107;
-}
+} */
 
 .actions svg {
   font-size: 1.5rem;

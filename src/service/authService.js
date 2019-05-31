@@ -1,35 +1,71 @@
 import jwtDecode from "jwt-decode";
 import http from "./httpService";
- 
+import Cookies from 'universal-cookie';
+import { apiUrl, staticToken } from "../config.json";
+
+const cookies = new Cookies();
 const tokenKey = "token";
 
-http.setJwt(getJwt());
+
+http.setJwt(staticToken);
 
 
 export function loginWithJwt(jwt) {
-  localStorage.setItem(tokenKey, jwt);
+  cookies.set(tokenKey, jwt, { path: '/' });
 }
 
-export function logout() {
-  localStorage.removeItem(tokenKey);
+export async function logout() {
+ await cookies.remove('__info', { path: '/' });
+ await cookies.remove("__cartAmount", { path: '/' });
+ await cookies.remove(tokenKey, { path: '/' });
 }
 
 export function getCurrentUser() {
   try {
-    const jwt = localStorage.getItem(tokenKey);
-    console.log(jwtDecode(jwt)) 
-    return;
+    const jwt = cookies.get(tokenKey);
+    jwtDecode(jwt)
+    return true;
   } catch (ex) {
-    return null;
+    return false;
   }
 }
 
+export const storeData = (key, value) => {
+  cookies.set(key, value, { path: '/' });
+}
 
-export function getJwt() {
-  return localStorage.getItem(tokenKey);
+export function getJwt(key) {
+  return cookies.get(key);
 }
 
 
+export const signUp = (data) => {
+  const apiEndPoint = `${apiUrl}/registration`;
+  return http.post(apiEndPoint, data)
+}
+
+export const login = (data) => {
+  const apiEndPoint = `${apiUrl}/login`;
+  return http.post(apiEndPoint, data)
+}
+
+// send OTP
+export const sendOtp = (params) => {
+  const apiEndPoint = `${apiUrl}/otp?${params}`;
+  return http.get(apiEndPoint)
+}
+
+// forgot password 
+export const forgotPassword = (data) => {
+  const apiEndPoint = `${apiUrl}/forgotPassword`;
+  return http.post(apiEndPoint, data)
+}
+
+
+export const checkUser = (data) => {
+  const apiEndPoint = `${apiUrl}/checkusers?emailId=${data}`;
+  return http.get(apiEndPoint)
+}
 
 export default {
   loginWithJwt,

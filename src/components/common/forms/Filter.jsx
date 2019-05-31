@@ -1,8 +1,8 @@
-import React, { PureComponent, Fragment } from 'react';
-import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, FormGroup, Label, Input } from 'reactstrap';
-import _ from 'lodash';
-
 import 'styles/filter.css';
+
+import _ from 'lodash';
+import React, { Fragment, PureComponent } from 'react';
+import { DropdownItem, DropdownMenu, DropdownToggle, FormGroup, Input, Label, UncontrolledDropdown } from 'reactstrap';
 
 class Filter extends PureComponent {
 

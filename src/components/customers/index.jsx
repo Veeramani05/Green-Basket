@@ -1,8 +1,7 @@
-
-import React, { PureComponent, Fragment } from 'react';
-
-import UserDetails from 'components/customers/UserDetails';
 import UserFeedBack from 'components/customers/FeedBack';
+import UserDetails from 'components/customers/UserDetails';
+import React, { Fragment, PureComponent } from 'react';
+
 
 class Customers extends PureComponent {
 
@@ -10,9 +9,9 @@ class Customers extends PureComponent {
     const { match: { params: { pageName } } } = this.props;
     switch (pageName) {
       case "details":
-        return <UserDetails />
+        return <UserDetails props={this.props} />
       case 'feedback':
-        return <UserFeedBack />
+        return <UserFeedBack props={this.props} />
       default:
         return;
     }

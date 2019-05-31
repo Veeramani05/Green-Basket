@@ -1,7 +1,7 @@
-import React, { PureComponent, Fragment } from 'react'
- 
 import ContactList from 'components/contact/ContactList';
 import AddContact from 'components/contact/forms';
+import ViewDetails from 'components/contact/ViewDetails';
+import React, { Fragment, PureComponent } from 'react';
 
 
 class Contact extends PureComponent {
@@ -11,9 +11,13 @@ class Contact extends PureComponent {
     const { match: { params: { pageName } } } = this.props;
     switch (pageName) {
       case 'list':
-        return <ContactList />
-      case 'form':
-        return <AddContact />
+        return <ContactList props={this.props} />
+      case 'addform':
+        return <AddContact props={this.props} />
+      case 'editform':
+        return <AddContact props={this.props} />
+      case 'viewform':
+        return <ViewDetails props={this.props} />
       default:
         return;
     }

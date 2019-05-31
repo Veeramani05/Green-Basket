@@ -1,18 +1,24 @@
-import React, { PureComponent, Fragment } from 'react'
-
+import ChangePassword from 'auth/ChangePassword';
+import ForgotPassword from 'auth/ForgotPassword';
 import Login from 'auth/Login';
 import SignUp from 'auth/SignUp';
+import React, { Fragment, PureComponent } from 'react';
+import { Col, Container, Row } from 'reactstrap';
 
 class Auth extends PureComponent {
 
 
   frameLoad = () => {
-    const { pageName } = this.props;
+    const { match: { params: { pageName } } } = this.props;
     switch (pageName) {
-      case 'login':
-        return <Login />
-      case 'signUp':
-        return <SignUp />
+      case 'identifier':
+        return <Login props={this.props} />
+      case 'webcreateaccount':
+        return <SignUp props={this.props} />
+      case 'usernamerecovery':
+        return <ForgotPassword props={this.props} />
+      case 'changepassword':
+        return <ChangePassword props={this.props} /> 
       default:
         return <Login />;
     }
@@ -21,7 +27,15 @@ class Auth extends PureComponent {
   render() {
     return (
       <Fragment>
-        {this.frameLoad()}
+        <Container>
+          <Row className="loginformpadding">
+            <Col md={4} className="login-sec">
+              {this.frameLoad()}
+            </Col>
+            <Col md={8} className="banner-sec">
+            </Col>
+          </Row>
+        </Container>
       </Fragment>
     )
   }
